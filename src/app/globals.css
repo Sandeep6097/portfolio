@@ -1,0 +1,132 @@
+@import "tailwindcss";
+
+:root {
+  --background: #fcfdfc;
+  --foreground: #111a14;
+  --color-primary-green: #095232;
+  --color-primary-green-hover: #063d24;
+  --color-accent-gold: #b38b32;
+  --color-accent-gold-hover: #916f24;
+  --color-card-bg: #ffffff;
+  --color-card-border: #e3ede6;
+  --color-text-muted: #4b6b5b;
+  --glow-color: rgba(9, 82, 50, 0.1);
+  --glass-bg: rgba(255, 255, 255, 0.8);
+  --glass-border: rgba(9, 82, 50, 0.1);
+}
+
+.dark {
+  --background: #030604;
+  --foreground: #f0faf4;
+  --color-primary-green: #10b981;
+  --color-primary-green-hover: #34d399;
+  --color-accent-gold: #caa356;
+  --color-accent-gold-hover: #e0bb70;
+  --color-card-bg: #0b110e;
+  --color-card-border: #182820;
+  --color-text-muted: #8ea79a;
+  --glow-color: rgba(16, 185, 129, 0.15);
+  --glass-bg: rgba(11, 17, 14, 0.8);
+  --glass-border: rgba(16, 185, 129, 0.1);
+}
+
+@theme {
+  /* Custom requested breakpoints */
+  --breakpoint-xs: 450px;
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 991px;
+  --breakpoint-xl: 1100px;
+  --breakpoint-2xl: 1300px;
+  --breakpoint-3xl: 1800px;
+  --breakpoint-4xl: 2600px;
+
+  /* Theme color mapping */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary-green: var(--color-primary-green);
+  --color-primary-green-hover: var(--color-primary-green-hover);
+  --color-accent-gold: var(--color-accent-gold);
+  --color-accent-gold-hover: var(--color-accent-gold-hover);
+  --color-card-bg: var(--color-card-bg);
+  --color-card-border: var(--color-card-border);
+  --color-text-muted: var(--color-text-muted);
+  --color-glow: var(--glow-color);
+  --color-glass-bg: var(--glass-bg);
+  --color-glass-border: var(--glass-border);
+
+  /* Animation additions */
+  --animate-fade-in-up: fade-in-up 0.6s ease-out forwards;
+  --animate-glow-pulse: glow-pulse 3s infinite ease-in-out;
+  --animate-float: float 6s ease-in-out infinite;
+
+  @keyframes fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes glow-pulse {
+    0%, 100% {
+      box-shadow: 0 0 15px 2px var(--glow-color);
+    }
+    50% {
+      box-shadow: 0 0 25px 8px var(--glow-color);
+    }
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  overflow-x: hidden;
+}
+
+/* Glassmorphism utility */
+.glassmorphism {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+}
+
+/* Gradient text utilities */
+.text-gradient-green-gold {
+  background: linear-gradient(135deg, var(--color-primary-green) 30%, var(--color-accent-gold) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Custom premium scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-card-border);
+  border-radius: 5px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary-green);
+}
+
+html {
+  scroll-behavior: smooth;
+}
