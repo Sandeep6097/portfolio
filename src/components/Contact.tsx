@@ -23,12 +23,37 @@ const LinkedinIcon = (props: React.SVGProps<SVGSVGElement>) => (
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzNnZYkUQP-kXhN-ukucWHOd809pjjiw9rus9FQXXGtYqoatUA4YF8TbKZmbq6J7kbG5w/exec";
 
 export default function Contact() {
-  const [formState, setFormState] = useState({ name: "", email: "", message: "" });
+  const [formState, setFormState] = useState({ name: "", email: "", mobile: "", message: "" });
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+  const [errors, setErrors] = useState({ email: "", mobile: "" });
+
+  const validateForm = () => {
+    let isValid = true;
+    const newErrors = { email: "", mobile: "" };
+
+    // Email verification regex
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formState.email)) {
+      newErrors.email = "Please enter a valid email address (e.g. name@domain.com).";
+      isValid = false;
+    }
+
+    // Mobile verification (allows optional + and 10 to 14 digits)
+    const mobileRegex = /^[+]?[0-9]{10,14}$/;
+    if (!mobileRegex.test(formState.mobile)) {
+      newErrors.mobile = "Please enter a valid mobile number (10 to 14 digits, e.g. +919876543210).";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formState.name || !formState.email || !formState.message) return;
+    if (!formState.name || !formState.email || !formState.mobile || !formState.message) return;
+
+    if (!validateForm()) return;
 
     setStatus("submitting");
 
@@ -38,7 +63,7 @@ export default function Contact() {
       // Fallback simulation if no script URL is configured
       setTimeout(() => {
         setStatus("success");
-        setFormState({ name: "", email: "", message: "" });
+        setFormState({ name: "", email: "", mobile: "", message: "" });
         setTimeout(() => setStatus("idle"), 5000);
       }, 1500);
       return;
@@ -48,6 +73,7 @@ export default function Contact() {
       const formData = new URLSearchParams();
       formData.append("name", formState.name);
       formData.append("email", formState.email);
+      formData.append("mobile", formState.mobile);
       formData.append("message", formState.message);
 
       await fetch(scriptUrl, {
@@ -60,7 +86,7 @@ export default function Contact() {
       });
 
       setStatus("success");
-      setFormState({ name: "", email: "", message: "" });
+      setFormState({ name: "", email: "", mobile: "", message: "" });
       setTimeout(() => setStatus("idle"), 5000);
     } catch (error) {
       console.error("Form submission error:", error);
@@ -72,6 +98,11 @@ export default function Contact() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormState((prev) => ({ ...prev, [name]: value }));
+    
+    // Clear validation error on type
+    if (name === "email" || name === "mobile") {
+      setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
   };
 
   const contactInfo = [
@@ -197,9 +228,43 @@ export default function Contact() {
                     required
                     value={formState.email}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-xl border border-card-border bg-background/50 focus:border-primary-green focus:ring-1 focus:ring-primary-green outline-none text-sm transition-all duration-300"
+                    className={`w-full px-4 py-3 rounded-xl border bg-background/50 focus:ring-1 outline-none text-sm transition-all duration-300 ${
+                      errors.email
+                        ? "border-red-500/50 focus:border-red-500 focus:ring-red-500"
+                        : "border-card-border focus:border-primary-green focus:ring-primary-green"
+                    }`}
                     placeholder="johndoe@example.com"
                   />
+                  {errors.email && (
+                    <p className="text-[11px] font-semibold text-red-500 animate-fade-in-up">
+                      {errors.email}
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="mobile" className="text-xs font-semibold text-foreground/90 uppercase tracking-wider">
+                    Mobile Number
+                  </label>
+                  <input
+                    type="tel"
+                    id="mobile"
+                    name="mobile"
+                    required
+                    value={formState.mobile}
+                    onChange={handleChange}
+                    className={`w-full px-4 py-3 rounded-xl border bg-background/50 focus:ring-1 outline-none text-sm transition-all duration-300 ${
+                      errors.mobile
+                        ? "border-red-500/50 focus:border-red-500 focus:ring-red-500"
+                        : "border-card-border focus:border-primary-green focus:ring-primary-green"
+                    }`}
+                    placeholder="e.g. +919876543210"
+                  />
+                  {errors.mobile && (
+                    <p className="text-[11px] font-semibold text-red-500 animate-fade-in-up">
+                      {errors.mobile}
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
