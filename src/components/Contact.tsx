@@ -19,19 +19,53 @@ const LinkedinIcon = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
+// Replace this with your Google Web App URL once deployed
+const GOOGLE_SCRIPT_URL = "";
+
 export default function Contact() {
   const [formState, setFormState] = useState({ name: "", email: "", message: "" });
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (formState.name && formState.email && formState.message) {
-      // Simulate form submission
-      setIsSubmitted(true);
+    if (!formState.name || !formState.email || !formState.message) return;
+
+    setStatus("submitting");
+
+    const scriptUrl = GOOGLE_SCRIPT_URL || process.env.NEXT_PUBLIC_GOOGLE_SCRIPT_URL;
+
+    if (!scriptUrl) {
+      // Fallback simulation if no script URL is configured
       setTimeout(() => {
-        setIsSubmitted(false);
+        setStatus("success");
         setFormState({ name: "", email: "", message: "" });
-      }, 5000);
+        setTimeout(() => setStatus("idle"), 5000);
+      }, 1500);
+      return;
+    }
+
+    try {
+      const formData = new URLSearchParams();
+      formData.append("name", formState.name);
+      formData.append("email", formState.email);
+      formData.append("message", formState.message);
+
+      await fetch(scriptUrl, {
+        method: "POST",
+        mode: "no-cors",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: formData.toString(),
+      });
+
+      setStatus("success");
+      setFormState({ name: "", email: "", message: "" });
+      setTimeout(() => setStatus("idle"), 5000);
+    } catch (error) {
+      console.error("Form submission error:", error);
+      setStatus("error");
+      setTimeout(() => setStatus("idle"), 5000);
     }
   };
 
@@ -186,19 +220,29 @@ export default function Contact() {
 
                 <button
                   type="submit"
-                  className="w-full inline-flex items-center justify-center px-6 py-3.5 rounded-xl bg-primary-green hover:bg-primary-green-hover text-white dark:text-background font-semibold tracking-wide transition-all duration-300 hover:shadow-lg shadow-primary-green/20 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                  disabled={status === "submitting"}
+                  className="w-full inline-flex items-center justify-center px-6 py-3.5 rounded-xl bg-primary-green hover:bg-primary-green-hover text-white dark:text-background font-semibold tracking-wide transition-all duration-300 hover:shadow-lg shadow-primary-green/20 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 >
                   <Send className="w-4 h-4 mr-2" />
-                  Send Message
+                  {status === "submitting" ? "Sending..." : "Send Message"}
                 </button>
               </form>
 
               {/* Status Message popup */}
-              {isSubmitted && (
+              {status === "success" && (
                 <div className="mt-6 p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-500 flex items-center space-x-2 animate-fade-in-up">
                   <CheckCircle className="w-5 h-5 flex-shrink-0" />
                   <span className="text-xs font-semibold">
-                    Thank you! Your message has been sent successfully (Simulated).
+                    Thank you! Your message has been sent successfully.
+                  </span>
+                </div>
+              )}
+
+              {status === "error" && (
+                <div className="mt-6 p-4 rounded-xl border border-red-500/20 bg-red-500/10 text-red-500 flex items-center space-x-2 animate-fade-in-up">
+                  <CheckCircle className="w-5 h-5 flex-shrink-0 rotate-180" />
+                  <span className="text-xs font-semibold">
+                    Oops! Something went wrong. Please check your network and try again.
                   </span>
                 </div>
               )}
