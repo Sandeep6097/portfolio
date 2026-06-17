@@ -25,23 +25,85 @@ const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzNnZYkUQP-kX
 export default function Contact() {
   const [formState, setFormState] = useState({ name: "", email: "", mobile: "", message: "" });
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
-  const [errors, setErrors] = useState({ email: "", mobile: "" });
+  const [errors, setErrors] = useState({ name: "", email: "", mobile: "", message: "" });
+
+  const validateField = (name: string, value: string) => {
+    let error = "";
+    if (name === "name") {
+      const nameRegex = /^[A-Za-z\s]+$/;
+      if (!value.trim()) {
+        error = "Name is required.";
+      } else if (!nameRegex.test(value)) {
+        error = "Name must contain only letters and spaces.";
+      }
+    } else if (name === "email") {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!value.trim()) {
+        error = "Email is required.";
+      } else if (!emailRegex.test(value)) {
+        error = "Please enter a valid email address.";
+      }
+    } else if (name === "mobile") {
+      const mobileRegex = /^[+]?[0-9]{10,14}$/;
+      if (!value.trim()) {
+        error = "Mobile number is required.";
+      } else if (!mobileRegex.test(value)) {
+        error = "Please enter a valid mobile number (10 to 14 digits, numbers only).";
+      }
+    } else if (name === "message") {
+      const words = value.trim().split(/\s+/).filter(Boolean);
+      const wordCount = words.length;
+      if (wordCount === 0) {
+        error = "Message is required (min 1 word).";
+      } else if (wordCount > 250) {
+        error = `Message cannot exceed 250 words. (Current: ${wordCount}/250 words)`;
+      }
+    }
+    setErrors((prev) => ({ ...prev, [name]: error }));
+  };
 
   const validateForm = () => {
+    const newErrors = { name: "", email: "", mobile: "", message: "" };
     let isValid = true;
-    const newErrors = { email: "", mobile: "" };
 
-    // Email verification regex
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formState.email)) {
-      newErrors.email = "Please enter a valid email address (e.g. name@domain.com).";
+    // Name
+    const nameRegex = /^[A-Za-z\s]+$/;
+    if (!formState.name.trim()) {
+      newErrors.name = "Name is required.";
+      isValid = false;
+    } else if (!nameRegex.test(formState.name)) {
+      newErrors.name = "Name must contain only letters and spaces.";
       isValid = false;
     }
 
-    // Mobile verification (allows optional + and 10 to 14 digits)
+    // Email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!formState.email.trim()) {
+      newErrors.email = "Email is required.";
+      isValid = false;
+    } else if (!emailRegex.test(formState.email)) {
+      newErrors.email = "Please enter a valid email address.";
+      isValid = false;
+    }
+
+    // Mobile
     const mobileRegex = /^[+]?[0-9]{10,14}$/;
-    if (!mobileRegex.test(formState.mobile)) {
-      newErrors.mobile = "Please enter a valid mobile number (10 to 14 digits, e.g. +919876543210).";
+    if (!formState.mobile.trim()) {
+      newErrors.mobile = "Mobile number is required.";
+      isValid = false;
+    } else if (!mobileRegex.test(formState.mobile)) {
+      newErrors.mobile = "Please enter a valid mobile number (10 to 14 digits, numbers only).";
+      isValid = false;
+    }
+
+    // Message
+    const words = formState.message.trim().split(/\s+/).filter(Boolean);
+    const wordCount = words.length;
+    if (wordCount === 0) {
+      newErrors.message = "Message is required (min 1 word).";
+      isValid = false;
+    } else if (wordCount > 250) {
+      newErrors.message = `Message cannot exceed 250 words. (Current: ${wordCount}/250 words)`;
       isValid = false;
     }
 
@@ -97,12 +159,17 @@ export default function Contact() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormState((prev) => ({ ...prev, [name]: value }));
     
-    // Clear validation error on type
-    if (name === "email" || name === "mobile") {
-      setErrors((prev) => ({ ...prev, [name]: "" }));
+    // Prevent non-numeric inputs in mobile field at keypress level
+    if (name === "mobile") {
+      const cleanValue = value.replace(/[^\d+]/g, "");
+      setFormState((prev) => ({ ...prev, [name]: cleanValue }));
+      validateField(name, cleanValue);
+      return;
     }
+
+    setFormState((prev) => ({ ...prev, [name]: value }));
+    validateField(name, value);
   };
 
   const contactInfo = [
@@ -212,9 +279,18 @@ export default function Contact() {
                     required
                     value={formState.name}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-xl border border-card-border bg-background/50 focus:border-primary-green focus:ring-1 focus:ring-primary-green outline-none text-sm transition-all duration-300"
+                    className={`w-full px-4 py-3 rounded-xl border bg-background/50 focus:ring-1 outline-none text-sm transition-all duration-300 ${
+                      errors.name
+                        ? "border-red-500/50 focus:border-red-500 focus:ring-red-500"
+                        : "border-card-border focus:border-primary-green focus:ring-primary-green"
+                    }`}
                     placeholder="John Doe"
                   />
+                  {errors.name && (
+                    <p className="text-[11px] font-semibold text-red-500 animate-fade-in-up">
+                      {errors.name}
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -278,9 +354,18 @@ export default function Contact() {
                     rows={5}
                     value={formState.message}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-xl border border-card-border bg-background/50 focus:border-primary-green focus:ring-1 focus:ring-primary-green outline-none text-sm transition-all duration-300 resize-none"
+                    className={`w-full px-4 py-3 rounded-xl border bg-background/50 focus:ring-1 outline-none text-sm transition-all duration-300 resize-none ${
+                      errors.message
+                        ? "border-red-500/50 focus:border-red-500 focus:ring-red-500"
+                        : "border-card-border focus:border-primary-green focus:ring-primary-green"
+                    }`}
                     placeholder="Hey Sandeep, let's discuss a project..."
                   />
+                  {errors.message && (
+                    <p className="text-[11px] font-semibold text-red-500 animate-fade-in-up">
+                      {errors.message}
+                    </p>
+                  )}
                 </div>
 
                 <button
