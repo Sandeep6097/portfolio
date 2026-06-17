@@ -34,7 +34,6 @@ export default function Experience() {
     },
   ];
 
-  // Keep track of which experiences are expanded (all expanded by default)
   const [expanded, setExpanded] = useState<Record<number, boolean>>({
     0: true,
     1: true,
@@ -48,8 +47,8 @@ export default function Experience() {
   };
 
   return (
-    <section id="experience" className="py-20 relative">
-      <div className="max-w-[1200px] mx-auto px-4 xs:px-6 md:px-8">
+    <section id="experience" className="py-20 relative bg-card-bg/10">
+      <div className="max-w-[1400px] mx-auto px-4 xs:px-6 md:px-8">
         {/* Section Title */}
         <div className="text-center space-y-3 mb-16">
           <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight font-sans">
@@ -61,72 +60,72 @@ export default function Experience() {
           </p>
         </div>
 
-        {/* Timeline Container */}
-        <div className="relative border-l border-card-border/70 dark:border-card-border ml-4 md:ml-8 pl-8 md:pl-12 space-y-12">
+        {/* Mockup Timeline Structure */}
+        <div className="relative space-y-10 md:space-y-0">
+          {/* Vertical Center Line for Desktop */}
+          <div className="absolute left-4 md:left-1/2 top-2 bottom-2 w-[1px] bg-card-border/80 dark:bg-card-border -translate-x-1/2 hidden md:block" />
+
           {experiences.map((exp, idx) => (
-            <div key={idx} className="relative group">
-              {/* Timeline Icon Node */}
-              <div className="absolute -left-[53px] md:-left-[69px] top-1.5 p-2 rounded-full border border-card-border bg-card-bg text-primary-green group-hover:text-accent-gold group-hover:border-accent-gold transition-all duration-300 shadow-md">
-                <Briefcase className="w-5 h-5 stroke-[2]" />
+            <div key={idx} className="relative grid grid-cols-1 md:grid-cols-11 gap-4 md:gap-8 items-start group">
+              {/* Left Column (Dates & Location) */}
+              <div className="md:col-span-5 md:text-right pl-8 md:pl-0 space-y-1 md:py-2">
+                <span className="text-xs font-mono font-bold text-accent-gold uppercase tracking-wider block">
+                  {exp.duration}
+                </span>
+                <p className="text-xs font-semibold text-text-muted flex items-center md:justify-end">
+                  <MapPin className="w-3.5 h-3.5 mr-1 md:mr-0 md:ml-1 text-primary-green flex-shrink-0" />
+                  {exp.location}
+                </p>
               </div>
 
-              {/* Card Container */}
-              <div className="glassmorphism border border-glass-border rounded-2xl p-6 md:p-8 hover:shadow-xl dark:hover:shadow-primary-green/5 transition-all duration-300">
-                {/* Heading details */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-card-border/30">
-                  <div className="space-y-1.5">
-                    <h3 className="text-xl md:text-2xl font-bold text-foreground/95 font-sans leading-tight">
-                      {exp.role}
-                    </h3>
-                    <p className="text-sm font-semibold text-primary-green">
-                      {exp.company}
-                    </p>
-                  </div>
+              {/* Middle Column (Visual Node) */}
+              <div className="absolute left-4 md:left-1/2 top-1.5 md:col-span-1 flex items-center justify-center -translate-x-1/2 z-10">
+                <div className="w-4 h-4 rounded-full bg-card-bg border-4 border-primary-green group-hover:border-accent-gold transition-colors duration-300 shadow-md animate-glow-pulse" />
+              </div>
 
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs text-text-muted font-medium">
-                    <span className="flex items-center">
-                      <Calendar className="w-3.5 h-3.5 mr-1 text-accent-gold" />
-                      {exp.duration}
-                    </span>
-                    <span className="flex items-center">
-                      <MapPin className="w-3.5 h-3.5 mr-1 text-accent-gold" />
-                      {exp.location}
-                    </span>
-                  </div>
-                </div>
+              {/* Right Column (Role & Details Card) */}
+              <div className="md:col-span-5 pl-8 md:pl-0">
+                <div className="glassmorphism border border-glass-border rounded-2xl p-5 xs:p-6 hover:shadow-xl dark:hover:shadow-primary-green/5 transition-all duration-300 relative">
+                  <h3 className="text-lg xs:text-xl font-extrabold text-foreground/95 font-sans leading-tight">
+                    {exp.role}
+                  </h3>
+                  <p className="text-xs font-bold text-primary-green mt-1">
+                    {exp.company}
+                  </p>
 
-                {/* Collapsible toggle for details */}
-                <div className="flex justify-end pt-2">
-                  <button
-                    onClick={() => toggleExpand(idx)}
-                    className="inline-flex items-center space-x-1 text-xs font-semibold text-text-muted hover:text-primary-green transition-colors cursor-pointer"
-                  >
-                    <span>{expanded[idx] ? "Hide Details" : "Show Details"}</span>
-                    {expanded[idx] ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-                  </button>
-                </div>
-
-                {/* Bullets lists */}
-                {expanded[idx] && (
-                  <ul className="mt-4 space-y-3 pl-5 list-disc text-sm text-text-muted leading-relaxed transition-all duration-500 animate-fade-in-up">
-                    {exp.bullets.map((bullet, bIdx) => (
-                      <li key={bIdx} className="hover:text-foreground/90 transition-colors">
-                        {bullet}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-
-                {/* Badges footer */}
-                <div className="mt-6 flex flex-wrap gap-2">
-                  {exp.tags.map((tag, tIdx) => (
-                    <span
-                      key={tIdx}
-                      className="text-xs font-mono font-medium px-3 py-1 rounded-md border border-card-border/50 bg-card-bg/60 text-foreground/80"
+                  {/* Collapse Toggle */}
+                  <div className="flex justify-end mt-2">
+                    <button
+                      onClick={() => toggleExpand(idx)}
+                      className="inline-flex items-center space-x-1 text-[11px] font-semibold text-text-muted hover:text-primary-green transition-colors cursor-pointer"
                     >
-                      {tag}
-                    </span>
-                  ))}
+                      <span>{expanded[idx] ? "Hide Details" : "Show Details"}</span>
+                      {expanded[idx] ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                    </button>
+                  </div>
+
+                  {/* Description bullets */}
+                  {expanded[idx] && (
+                    <ul className="mt-4 space-y-2.5 pl-4 list-disc text-xs text-text-muted leading-relaxed transition-all duration-300 animate-fade-in-up">
+                      {exp.bullets.map((bullet, bIdx) => (
+                        <li key={bIdx} className="hover:text-foreground/90 transition-colors">
+                          {bullet}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+
+                  {/* Tech Pill Badges */}
+                  <div className="mt-5 pt-4 border-t border-card-border/30 flex flex-wrap gap-1.5">
+                    {exp.tags.map((tag, tIdx) => (
+                      <span
+                        key={tIdx}
+                        className="text-[10px] font-mono font-medium px-2.5 py-0.5 rounded bg-background/80 border border-card-border/40 text-foreground/80"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
