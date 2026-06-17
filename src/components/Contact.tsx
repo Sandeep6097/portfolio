@@ -20,7 +20,7 @@ const LinkedinIcon = (props: React.SVGProps<SVGSVGElement>) => (
 );
 
 // Replace this with your Google Web App URL once deployed
-const GOOGLE_SCRIPT_URL = "";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzNnZYkUQP-kXhN-ukucWHOd809pjjiw9rus9FQXXGtYqoatUA4YF8TbKZmbq6J7kbG5w/exec";
 
 export default function Contact() {
   const [formState, setFormState] = useState({ name: "", email: "", message: "" });
